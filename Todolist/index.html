@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Todo</title>
+<style>
+body{margin:0;height:100vh;display:flex;justify-content:center;align-items:center;background:#b8f2c5;font-family:sans-serif}
+.app{width:380px;background:#fff;padding:20px;border-radius:20px;box-shadow:10px 10px 25px rgba(0,0,0,.15)}
+h1{text-align:center;color:#6a0dad}
+input{flex:1;padding:10px;border-radius:10px;border:1px solid #ddd}
+button{padding:8px 10px;border:0;border-radius:10px;background:#6a0dad;color:#fff;cursor:pointer}
+button:hover{background:#8b3fd1}
+.row{display:flex;gap:8px}
+.filters{display:flex;gap:5px;margin:10px 0}
+.filters button{flex:1;font-size:12px}
+.active{background:#4b0082!important}
+ul{padding:0;list-style:none}
+li{display:flex;justify-content:space-between;background:#f4f4f4;margin:5px 0;padding:8px;border-radius:10px}
+.done span{text-decoration:line-through;color:#999}
+.count{font-size:13px;margin:5px 0}
+.del{background:red;font-size:12px}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>Todo</h1>
+
+<div class="row">
+<input id="i">
+<button onclick="add()">+</button>
+</div>
+
+<div class="filters">
+<button onclick="set('all')">전체</button>
+<button onclick="set('active')">진행</button>
+<button onclick="set('done')">완료</button>
+</div>
+
+<div class="count" id="c"></div>
+<ul id="l"></ul>
+</div>
+
+<script>
+let t=[],f="all";
+
+add=_=>{
+let v=i.value.trim();
+if(!v)return;
+t.push({id:Date.now(),text:v,done:0});
+i.value="";
+r();
+}
+
+i.onkeydown=e=>e.key==="Enter"&&add();
+
+toggle=id=>{
+t=t.map(x=>x.id===id?{...x,done:!x.done}:x);
+r();
+}
+
+del=(id,el)=>{
+el.remove();
+t=t.filter(x=>x.id!==id);
+r();
+}
+
+set=x=>{
+f=x;
+r();
+}
+
+r=_=>{
+let d=t;
+if(f==="active")d=t.filter(x=>!x.done);
+if(f==="done")d=t.filter(x=>x.done);
+
+l.innerHTML="";
+d.forEach(x=>{
+let li=document.createElement("li");
+if(x.done)li.classList.add("done");
+li.innerHTML=`<span onclick="toggle(${x.id})">${x.text}</span><button class="del">x</button>`;
+li.querySelector("button").onclick=()=>del(x.id,li);
+l.appendChild(li);
+});
+
+c.innerText="남은 할일: "+t.filter(x=>!x.done).length;
+};
+
+r();
+</script>
+</body>
+</html>
