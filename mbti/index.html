@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBTI 이모지 테스트</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <h1>🧠 MBTI 이모지 테스트</h1>
+
+  <div id="start-screen">
+    <p>12개의 질문으로 나의 성격을 알아보자!</p>
+    <button onclick="startTest()">시작하기</button>
+  </div>
+
+  <div id="quiz-screen" class="hidden">
+    <div id="progress"></div>
+    <h2 id="question"></h2>
+    <div id="options"></div>
+  </div>
+
+  <div id="result-screen" class="hidden">
+    <h2>결과</h2>
+    <div id="result-type"></div>
+    <p id="result-desc"></p>
+    <button onclick="location.reload()">다시하기</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
