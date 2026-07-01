@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Cyber Lotto Draw</title>
+<!-- 모바일 웹앱 설정 -->
+<meta name="theme-color" content="#7C3AED">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="로또번호추첨기">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+<!-- 파비콘 / 앱 아이콘 -->
+<link rel="icon" href="logo.jpg">
+<link rel="apple-touch-icon" href="logo.jpg">
+
+
+
+  
+  <title>Cyber Lotto</title>
+  
+  </head>
+<style>
+/* =====================================================================
+   Cyber Lotto Draw - 스타일 시트
+   - 다크 네이비 배경 + 시안/블루 네온 하이테크 HUD 컨셉
+   - 모바일 우선(Mobile First) 설계, 최대 폭 480px 컨테이너 기준
+   ===================================================================== */
+
+  /* ---------- 색상 / 디자인 토큰 (CSS 변수로 관리) ---------- */
+  :root {
+    --bg-deep: #05070f;           /* 가장 어두운 배경 */
+    --bg-navy: #0a1024;           /* 다크 네이비 기본 배경 */
+    --bg-navy-2: #0d1730;         /* 패널용 살짝 밝은 네이비 */
+    --neon-cyan: #17f2ff;         /* 메인 네온 시안 */
+    --neon-cyan-dim: #0aa8b8;
+    --neon-blue: #3d6bff;         /* 보조 네온 블루 */
+    --neon-purple: #7b3bff;       /* 포인트 퍼플 */
+    --line-soft: rgba(23, 242, 255, 0.18);
+    --glass-fill: rgba(15, 30, 55, 0.55);
+    --text-main: #eaf6ff;
+    --text-dim: #7f9bbd;
+
+    /* 로또 번호 범위별 컬러 */
+    --ball-1: #ffd23f;   /* 1~10 노랑 */
+    --ball-2: #2f8bff;   /* 11~20 파랑 */
+    --ball-3: #ff4d5e;   /* 21~30 빨강 */
+    --ball-4: #93a1b3;   /* 31~40 회색 */
+    --ball-5: #2be07f;   /* 41~45 초록 */
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-deep);
+    color: var(--text-main);
+    font-family: 'Segoe UI', 'Pretendard', 'Noto Sans KR', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+  }
+
+  /* ---------- 배경 : 네온 그리드 + 방사형 글로우 ---------- */
+  body {
+    background-image:
+      radial-gradient(ellipse at 50% 0%, rgba(61, 107, 255, 0.20), transparent 55%),
+      radial-gradient(ellipse at 50% 100%, rgba(123, 59, 255, 0.16), transparent 60%),
+      linear-gradient(var(--line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px),
+      linear-gradient(180deg, var(--bg-deep), var(--bg-navy) 40%, var(--bg-deep));
+    background-size: auto, auto, 34px 34px, 34px 34px, auto;
+    background-position: center;
+    min-height: 100vh;
+  }
+
+  .app-shell {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding: 18px 16px 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* =====================================================================
+     상단 영역 : 앱 타이틀 + HUD 상태 표시줄
+     ===================================================================== */
+  .hud-top {
+    text-align: center;
+    padding: 6px 0 10px;
+  }
+
+  .hud-status-line {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--neon-cyan-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .hud-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--neon-cyan);
+    box-shadow: 0 0 8px var(--neon-cyan), 0 0 16px var(--neon-cyan);
+    animation: dotBlink 1.6s ease-in-out infinite;
+  }
+
+  @keyframes dotBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+
+  .app-title {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    margin: 0;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue) 55%, var(--neon-purple));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 26px rgba(23, 242, 255, 0.35);
+  }
+
+  .app-subtitle {
+    font-size: 10.5px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    text-transform: uppercase;
+  }
+
+  /* 상단 HUD 코너 브라켓 장식 */
+  .hud-frame {
+    position: relative;
+    padding: 10px 4px 4px;
+  }
+
+  .hud-corner {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--neon-cyan);
+    opacity: 0.65;
+  }
+  .hud-corner.tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+  .hud-corner.tr { top: 0; right: 0; border-left: none; border-bottom: none; }
+
+  /* =====================================================================
+     중앙 영역 : 육각형 에너지 박스 (추첨 연출의 핵심)
+     ===================================================================== */
+  .draw-stage {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 0 6px;
+    min-height: 300px;
+  }
+
+  /* 스테이지 전체를 감싸는 정사각형 컨테이너 (육각형 비율 유지) */
+  .hex-wrap {
+    position: relative;
+    width: 260px;
+    height: 260px;
+  }
+
+  /* 공통 육각형 클리핑 경로 */
+  .hex-shape {
+    clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0% 50%);
+  }
+
+  /* 레이어 1 : 가장 바깥 금속 프레임 */
+  .hex-frame-outer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, #16233f, #0a1024 60%, #16233f);
+    box-shadow:
+      0 0 0 1px rgba(23, 242, 255, 0.25),
+      0 0 34px rgba(23, 242, 255, 0.18);
+  }
+
+  /* 레이어 2 : 시안 네온 외곽선 (약간 안쪽) */
+  .hex-frame-line {
+    position: absolute;
+    inset: 8px;
+    background: transparent;
+    box-shadow: inset 0 0 0 2px var(--neon-cyan);
+    opacity: 0.85;
+    animation: frameFlicker 3.4s ease-in-out infinite;
+  }
+
+  @keyframes frameFlicker {
+    0%, 100% { opacity: 0.55; }
+    45% { opacity: 0.95; }
+    50% { opacity: 0.35; }
+    55% { opacity: 0.9; }
+  }
+
+  /* 레이어 3 : 유리 재질 느낌의 홀로그램 패널 */
+  .hex-frame-glass {
+    position: absolute;
+    inset: 20px;
+    background:
+      linear-gradient(135deg, rgba(23, 242, 255, 0.14), rgba(123, 59, 255, 0.08) 60%, transparent),
+      linear-gradient(200deg, rgba(255,255,255,0.06), transparent 40%);
+    backdrop-filter: blur(2px);
+  }
+
+  /* 내부 에너지 코어 (은은하게 빛나는 중심) */
+  .energy-core {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 66px; height: 66px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #ffffff, var(--neon-cyan) 35%, var(--neon-blue) 70%, transparent 78%);
+    box-shadow: 0 0 30px 8px rgba(23, 242, 255, 0.55);
+    animation: coreBreathe 2.6s ease-in-out infinite;
+  }
+
+  @keyframes coreBreathe {
+    0%, 100% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.75; }
+    50% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+  }
+
+  /* HUD 스캔 라인 (평상시엔 느리게, 추첨 시엔 빠르게) */
+  .scan-line {
+    position: absolute;
+    left: 6%;
+    width: 88%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+    top: 0;
+    opacity: 0.7;
+    animation: scanMove 3.2s linear infinite;
+  }
+
+  @keyframes scanMove {
+    0% { top: 8%; }
+    100% { top: 92%; }
+  }
+
+  /* 육각형 진동 효과 (버튼 클릭 직후) */
+  .hex-wrap.shaking { animation: hexShake 0.4s ease-in-out 2; }
+  @keyframes hexShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+  }
+
+  /* 박스가 열리는 연출 : 강한 글로우 폭발 + 스캔 라인 가속 */
+  .hex-wrap.opening .hex-frame-line {
+    animation: frameOpenGlow 0.9s ease-in-out infinite;
+  }
+  @keyframes frameOpenGlow {
+    0%, 100% { opacity: 0.4; box-shadow: inset 0 0 0 2px var(--neon-cyan); }
+    50% { opacity: 1; box-shadow: inset 0 0 0 3px #ffffff, 0 0 40px 10px var(--neon-cyan); }
+  }
+
+  .hex-wrap.opening .scan-line { animation: scanMove 0.5s linear infinite; }
+
+  .hex-wrap.opening .energy-core {
+    animation: coreBurst 1s ease-in-out infinite;
+  }
+  @keyframes coreBurst {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 30px 8px rgba(23,242,255,0.55); }
+    50% { transform: translate(-50%, -50%) scale(1.6); box-shadow: 0 0 60px 22px rgba(23,242,255,0.85); }
+  }
+
+  /* 추첨 중 안내 텍스트 (박스 하단) */
+  .stage-caption {
+    position: absolute;
+    bottom: -30px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  /* =====================================================================
+     번호 공이 튀어나오는 영역 (육각형 위에 겹쳐서 표시)
+     ===================================================================== */
+  .ball-launch-area {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 18px;
+    pointer-events: none;
+  }
+
+  .lotto-ball {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 15px;
+    color: #ffffff;
+    position: relative;
+    opacity: 0;
+    transform: translateY(40px) scale(0.4);
+    /* 글래스모피즘 : 반투명 + 블러 + 하이라이트 */
+    backdrop-filter: blur(1px);
+    border: 1px solid rgba(255,255,255,0.35);
+  }
+
+  /* 순차 등장 애니메이션 (JS 에서 클래스를 붙이는 방식) */
+  .lotto-ball.show {
+    animation: ballPop 0.55s cubic-bezier(.2,1.4,.4,1) forwards;
+  }
+
+  @keyframes ballPop {
+    0%   { opacity: 0; transform: translateY(46px) scale(0.3); }
+    60%  { opacity: 1; transform: translateY(-8px) scale(1.12); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* 번호 범위별 색상 + 그에 맞는 네온 그림자 */
+  .ball-c1 { background: radial-gradient(circle at 35% 30%, #fff6c9, var(--ball-1) 55%, #b98700); box-shadow: 0 0 16px rgba(255, 210, 63, 0.75), inset 0 0 10px rgba(255,255,255,0.4); }
+  .ball-c2 { background: radial-gradient(circle at 35% 30%, #c9e2ff, var(--ball-2) 55%, #0d3f9c); box-shadow: 0 0 16px rgba(47, 139, 255, 0.75), inset 0 0 10px rgba(255,255,255,0.4); }
+  .ball-c3 { background: radial-gradient(circle at 35% 30%, #ffd3d6, var(--ball-3) 55%, #931019); box-shadow: 0 0 16px rgba(255, 77, 94, 0.75), inset 0 0 10px rgba(255,255,255,0.4); }
+  .ball-c4 { background: radial-gradient(circle at 35% 30%, #eef1f4, var(--ball-4) 55%, #4d565f); box-shadow: 0 0 16px rgba(147, 161, 179, 0.7), inset 0 0 10px rgba(255,255,255,0.4); }
+  .ball-c5 { background: radial-gradient(circle at 35% 30%, #d3ffe8, var(--ball-5) 55%, #0e8a4b); box-shadow: 0 0 16px rgba(43, 224, 127, 0.75), inset 0 0 10px rgba(255,255,255,0.4); }
+
+  /* =====================================================================
+     하단 영역 : 추첨 버튼
+     ===================================================================== */
+  .action-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 0 18px;
+  }
+
+  /* 육각형 화살표 형태의 버튼 */
+  .draw-button {
+    position: relative;
+    width: 220px;
+    height: 58px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(120deg, #0e1c3c, #0a1430);
+    color: var(--text-main);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    clip-path: polygon(6% 0, 94% 0, 100% 50%, 94% 100%, 6% 100%, 0 50%);
+    box-shadow:
+      0 0 0 1px rgba(23, 242, 255, 0.55),
+      0 0 18px rgba(61, 107, 255, 0.55),
+      0 0 34px rgba(23, 242, 255, 0.25);
+    transition: transform 0.15s ease, box-shadow 0.25s ease;
+    animation: buttonPulse 2.2s ease-in-out infinite;
+  }
+
+  @keyframes buttonPulse {
+    0%, 100% { box-shadow: 0 0 0 1px rgba(23,242,255,0.55), 0 0 18px rgba(61,107,255,0.5), 0 0 30px rgba(23,242,255,0.2); }
+    50% { box-shadow: 0 0 0 1px rgba(23,242,255,0.9), 0 0 26px rgba(61,107,255,0.85), 0 0 48px rgba(23,242,255,0.45); }
+  }
+
+  .draw-button:hover { transform: scale(1.045); }
+  .draw-button:active { transform: scale(0.94); }
+
+  /* 클릭 시 에너지 충전 오버레이 */
+  .draw-button .charge-fill {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--neon-blue), var(--neon-cyan));
+    transform: scaleX(0);
+    transform-origin: left center;
+    opacity: 0.85;
+    z-index: 0;
+  }
+  .draw-button.charging .charge-fill {
+    animation: chargeFill 0.9s ease-out forwards;
+  }
+  @keyframes chargeFill {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+
+  .draw-button span { position: relative; z-index: 1; }
+
+  .draw-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.75;
+    animation: none;
+  }
+
+  /* =====================================================================
+     결과 패널 (글래스모피즘 카드)
+     ===================================================================== */
+  .result-zone {
+    position: relative;
+    padding: 4px 2px 26px;
+  }
+
+  .result-card {
+    position: relative;
+    background: var(--glass-fill);
+    border: 1px solid rgba(23, 242, 255, 0.35);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    padding: 16px 16px 14px;
+    box-shadow: 0 0 24px rgba(23, 242, 255, 0.12), inset 0 0 20px rgba(23,242,255,0.04);
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    overflow: hidden;
+  }
+
+  .result-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .result-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--neon-cyan-dim);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .result-card-header .tag {
+    color: var(--neon-cyan);
+    border: 1px solid rgba(23,242,255,0.5);
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  .result-ball-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .result-ball-row .lotto-ball {
+    position: static;
+    opacity: 1;
+    transform: none;
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .result-footer {
+    margin-top: 12px;
+    text-align: center;
+    font-size: 10.5px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  /* =====================================================================
+     누적 결과 영역 (최대 3회) - 히스토리 헤더 / 카드 리스트 / 리셋 버튼
+     ===================================================================== */
+  .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--neon-cyan-dim);
+    text-transform: uppercase;
+    padding: 0 2px 8px;
+  }
+
+  .history-header .tag {
+    color: var(--neon-cyan);
+    border: 1px solid rgba(23,242,255,0.5);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 누적 카드들을 세로로 쌓는 컨테이너 */
+  .result-history {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* 히스토리 안의 카드 한 장 (기존 result-card 스타일을 재사용) */
+  .result-entry {
+    position: relative;
+    background: var(--glass-fill);
+    border: 1px solid rgba(23, 242, 255, 0.3);
+    border-radius: 14px;
+    backdrop-filter: blur(10px);
+    padding: 12px 14px 11px;
+    box-shadow: 0 0 18px rgba(23, 242, 255, 0.1), inset 0 0 16px rgba(23,242,255,0.04);
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+  }
+
+  .result-entry.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  /* 가장 최근(맨 위) 카드는 살짝 더 강조 */
+  .result-entry.latest {
+    border-color: rgba(23, 242, 255, 0.55);
+    box-shadow: 0 0 26px rgba(23, 242, 255, 0.2), inset 0 0 16px rgba(23,242,255,0.06);
+  }
+
+  .result-entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10.5px;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 9px;
+  }
+
+  .result-entry-header .entry-tag {
+    color: var(--neon-cyan);
+  }
+
+  .result-entry .result-ball-row {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+
+  .result-entry .result-ball-row .lotto-ball {
+    position: static;
+    opacity: 1;
+    transform: none;
+    width: 36px;
+    height: 36px;
+    font-size: 13px;
+  }
+
+  /* 3회 추첨을 모두 마쳤을 때 안내 문구 */
+  .history-complete-note {
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--neon-cyan-dim);
+    margin: 12px 0 2px;
+    text-transform: uppercase;
+  }
+
+  /* 육각형 리셋 버튼 (추첨 버튼보다 작고 차분한 톤) */
+  .reset-button {
+    display: none; /* 3회 도달 전에는 숨김 */
+    margin: 10px auto 0;
+    width: 190px;
+    height: 46px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(120deg, #0c1830, #08101f);
+    color: var(--text-dim);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    clip-path: polygon(6% 0, 94% 0, 100% 50%, 94% 100%, 6% 100%, 0 50%);
+    box-shadow: 0 0 0 1px rgba(123, 59, 255, 0.5), 0 0 16px rgba(123, 59, 255, 0.3);
+    transition: transform 0.15s ease, color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .reset-button.show { display: block; }
+
+  .reset-button:hover {
+    color: var(--text-main);
+    box-shadow: 0 0 0 1px rgba(123, 59, 255, 0.85), 0 0 24px rgba(123, 59, 255, 0.5);
+  }
+
+  .reset-button:active { transform: scale(0.95); }
+
+  /* =====================================================================
+     최하단 : 네온 몬스터 낙서 패턴 배경 장식 (가독성 방해 없도록 저투명도)
+     ===================================================================== */
+  .monster-strip {
+    position: relative;
+    height: 92px;
+    margin-top: auto;
+    background-repeat: repeat-x;
+    background-position: bottom center;
+    background-size: 210px 92px;
+    opacity: 0.35;
+    -webkit-mask-image: linear-gradient(to top, black 30%, transparent 95%);
+    mask-image: linear-gradient(to top, black 30%, transparent 95%);
+    pointer-events: none;
+  }
+
+  /* 화면 최상단 안전영역 대응 */
+  @supports (padding: max(0px)) {
+    .app-shell { padding-top: max(18px, env(safe-area-inset-top)); }
+  }
+</style>
+</head>
+<body>
+
+  <!-- =====================================================================
+       전체 앱 레이아웃 컨테이너
+       ===================================================================== -->
+  <div class="app-shell">
+
+    <!-- ---------------- 상단 : 타이틀 + HUD 상태 ---------------- -->
+    <header class="hud-top hud-frame">
+      <span class="hud-corner tl"></span>
+      <span class="hud-corner tr"></span>
+      <div class="hud-status-line">
+        <span class="hud-dot"></span>
+        <span id="hudStatusText">SYSTEM ONLINE // DRAW MODULE READY</span>
+      </div>
+      <h1 class="app-title">CYBER LOTTO DRAW</h1>
+      <p class="app-subtitle">Neon Draw Protocol &middot; 1-45</p>
+    </header>
+
+    <!-- ---------------- 중앙 : 육각형 에너지 박스 & 추첨 연출 ---------------- -->
+    <main class="draw-stage">
+      <div class="hex-wrap" id="hexWrap">
+        <div class="hex-shape hex-frame-outer"></div>
+        <div class="hex-shape hex-frame-line"></div>
+        <div class="hex-shape hex-frame-glass"></div>
+        <div class="scan-line"></div>
+        <div class="energy-core" id="energyCore"></div>
+
+        <!-- 번호 공이 튀어나올 영역 (박스 내부에 겹쳐 표시) -->
+        <div class="ball-launch-area" id="ballLaunchArea"></div>
+
+        <p class="stage-caption" id="stageCaption">STANDBY // 번호 추첨 버튼을 눌러주세요</p>
+      </div>
+    </main>
+
+    <!-- ---------------- 하단 : 추첨 버튼 ---------------- -->
+    <section class="action-zone">
+      <button class="draw-button" id="drawButton">
+        <span class="charge-fill"></span>
+        <span id="drawButtonLabel">번호 추첨</span>
+      </button>
+    </section>
+
+    <!-- ---------------- 결과 패널 : 최대 3회까지 누적 표시 ---------------- -->
+    <section class="result-zone">
+      <div class="history-header">
+        <span>DRAW HISTORY</span>
+        <span class="tag" id="drawCountTag">0/3</span>
+      </div>
+
+      <!-- 추첨 결과 카드가 이 안에 순서대로(최신이 위로) 쌓입니다 -->
+      <div class="result-history" id="resultHistory"></div>
+
+      <!-- 3회를 모두 채우면 표시되는 안내 문구 -->
+      <p class="history-complete-note" id="historyCompleteNote" style="display:none;">
+        MAX DRAW REACHED // 초기화 후 다시 시작할 수 있습니다
+      </p>
+
+      <!-- 3회를 모두 채우면 나타나는 리셋 버튼 -->
+      <button class="reset-button" id="resetButton">
+        <span>초기화</span>
+      </button>
+    </section>
+
+    <!-- ---------------- 최하단 : 네온 몬스터 패턴 장식 ---------------- -->
+    <div class="monster-strip" id="monsterStrip"></div>
+
+  </div>
+
+<script>
+/* =====================================================================
+   Cyber Lotto Draw - 클라이언트 스크립트
+   - 버튼 클릭부터 결과 표시까지의 전체 인터랙션 흐름을 담당합니다.
+   ===================================================================== */
+
+// 현재 추첨이 진행 중인지 확인하는 상태 변수 (중복 클릭 방지용)
+var isDrawing = false;
+
+// 지금까지 몇 번 추첨했는지 세는 카운터 (0 ~ MAX_DRAWS)
+var drawCount = 0;
+
+// 한 사이클(초기화 전까지) 동안 누적 가능한 최대 추첨 횟수
+var MAX_DRAWS = 3;
+
+// 자주 사용할 DOM 요소들을 미리 찾아서 변수에 저장해둡니다.
+var hexWrap = document.getElementById('hexWrap');
+var stageCaption = document.getElementById('stageCaption');
+var hudStatusText = document.getElementById('hudStatusText');
+var ballLaunchArea = document.getElementById('ballLaunchArea');
+var drawButton = document.getElementById('drawButton');
+var drawButtonLabel = document.getElementById('drawButtonLabel');
+var resultHistory = document.getElementById('resultHistory');
+var drawCountTag = document.getElementById('drawCountTag');
+var historyCompleteNote = document.getElementById('historyCompleteNote');
+var resetButton = document.getElementById('resetButton');
+
+/**
+ * 숫자 값에 따라 로또 공 색상 클래스를 반환하는 함수입니다.
+ * 1~10 노랑 / 11~20 파랑 / 21~30 빨강 / 31~40 회색 / 41~45 초록
+ * @param {number} num - 로또 번호
+ * @return {string} 색상 클래스 이름
+ */
+function getBallColorClass(num) {
+  if (num <= 10) return 'ball-c1';
+  if (num <= 20) return 'ball-c2';
+  if (num <= 30) return 'ball-c3';
+  if (num <= 40) return 'ball-c4';
+  return 'ball-c5';
+}
+
+/**
+ * 로또 공 하나를 표현하는 DOM 요소(span)를 만들어 반환하는 함수입니다.
+ * @param {number} num - 표시할 번호
+ * @return {HTMLElement} 완성된 공 엘리먼트
+ */
+function createBallElement(num) {
+  var ball = document.createElement('span');
+  ball.className = 'lotto-ball ' + getBallColorClass(num);
+  ball.textContent = num;
+  return ball;
+}
+
+/**
+ * 서버(Apps Script)에 로또 번호 추첨을 요청하는 함수입니다.
+ * google.script.run 을 Promise 형태로 감싸서 사용하기 쉽게 만들었습니다.
+ * 만약 Apps Script 환경이 아닌 곳에서 미리보기로 실행될 경우를 대비해
+ * 클라이언트에서 직접 뽑는 예비 로직(fallback)도 함께 준비했습니다.
+ * @return {Promise<number[]>} 추첨된 6개 번호 배열
+ */
+function requestNumbersFromServer() {
+  return new Promise(function (resolve, reject) {
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(resolve)
+        .withFailureHandler(reject)
+        .drawLottoNumbers();
+    } else {
+      // Apps Script 서버 환경이 아닐 때를 위한 예비(fallback) 로직
+      setTimeout(function () {
+        resolve(drawNumbersLocally());
+      }, 300);
+    }
+  });
+}
+
+/**
+ * 서버 호출이 불가능한 경우를 대비한 클라이언트 측 추첨 로직입니다.
+ * (Code.gs의 drawLottoNumbers 함수와 동일한 규칙을 사용합니다.)
+ * @return {number[]} 1~45 중 중복 없는 6개, 오름차순 정렬
+ */
+function drawNumbersLocally() {
+  var pool = [];
+  for (var i = 1; i <= 45; i++) pool.push(i);
+  for (var j = pool.length - 1; j > 0; j--) {
+    var r = Math.floor(Math.random() * (j + 1));
+    var t = pool[j]; pool[j] = pool[r]; pool[r] = t;
+  }
+  return pool.slice(0, 6).sort(function (a, b) { return a - b; });
+}
+
+/**
+ * 정해진 시간(ms) 만큼 기다리는 Promise를 반환하는 유틸 함수입니다.
+ * 연출 타이밍을 맞추기 위해 사용합니다.
+ * @param {number} ms - 대기 시간(밀리초)
+ */
+function wait(ms) {
+  return new Promise(function (resolve) { setTimeout(resolve, ms); });
+}
+
+/**
+ * ---------------------------------------------------------------------
+ * 우주선 발사 효과음 (Web Audio API 사용, 외부 오디오 파일 불필요)
+ * ---------------------------------------------------------------------
+ * 아래 3가지 소리를 겹쳐서 "우주선이 발사되는 듯한" 사운드를 만듭니다.
+ * 1) 엔진 노이즈 : 화이트 노이즈를 대역통과 필터로 걸러 로켓 분사음처럼 표현
+ * 2) 워프 스윕   : 톱니파 오실레이터의 주파수를 낮->높->낮 으로 흔들어 가속감 표현
+ * 3) 발사 신호음 : 짧고 높은 사각파 삐빅음으로 카운트다운 느낌 표현
+ */
+
+// 브라우저 오디오 컨텍스트는 한 번만 만들어서 재사용합니다.
+var spaceshipAudioCtx = null;
+
+/**
+ * 오디오 컨텍스트를 준비(생성 또는 재개)하는 함수입니다.
+ * 최신 브라우저는 사용자 클릭 같은 제스처 안에서만 소리 재생을 허용하므로,
+ * 이 함수는 반드시 버튼 클릭 이벤트 처리 안에서 호출되어야 합니다.
+ * @return {AudioContext|null} 사용 가능한 오디오 컨텍스트, 지원하지 않으면 null
+ */
+function getSpaceshipAudioContext() {
+  var AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return null; // 브라우저가 Web Audio API를 지원하지 않는 경우
+
+  if (!spaceshipAudioCtx) {
+    spaceshipAudioCtx = new AudioCtx();
+  }
+  if (spaceshipAudioCtx.state === 'suspended') {
+    spaceshipAudioCtx.resume();
+  }
+  return spaceshipAudioCtx;
+}
+
+/**
+ * 버튼을 눌렀을 때 재생할 우주선 발사 효과음을 만들어 재생하는 함수입니다.
+ * 소리 생성에 실패해도(구형 브라우저 등) 앱의 시각적 연출은 정상 진행되도록
+ * 모든 처리를 try/catch로 감쌌습니다.
+ */
+function playSpaceshipLaunchSound() {
+  try {
+    var ctx = getSpaceshipAudioContext();
+    if (!ctx) return;
+    var now = ctx.currentTime;
+
+    /* ---------- 1) 엔진 노이즈 (로켓 분사음) ---------- */
+    var noiseDuration = 1.1;
+    var bufferSize = Math.floor(ctx.sampleRate * noiseDuration);
+    var noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    var noiseData = noiseBuffer.getChannelData(0);
+    for (var i = 0; i < bufferSize; i++) {
+      noiseData[i] = Math.random() * 2 - 1; // -1 ~ 1 사이의 화이트 노이즈
+    }
+
+    var noiseSource = ctx.createBufferSource();
+    noiseSource.buffer = noiseBuffer;
+
+    // 노이즈를 로켓 분사음처럼 들리게 대역을 좁혀주는 필터
+    var noiseFilter = ctx.createBiquadFilter();
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.setValueAtTime(260, now);
+    noiseFilter.frequency.exponentialRampToValueAtTime(1400, now + 0.9);
+    noiseFilter.Q.value = 0.7;
+
+    var noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.0001, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.32, now + 0.12); // 순간적으로 커짐
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + noiseDuration); // 서서히 사라짐
+
+    noiseSource.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    noiseSource.start(now);
+    noiseSource.stop(now + noiseDuration);
+
+    /* ---------- 2) 워프 스윕 (가속하는 엔진음) ---------- */
+    var warpOsc = ctx.createOscillator();
+    warpOsc.type = 'sawtooth';
+    warpOsc.frequency.setValueAtTime(110, now);
+    warpOsc.frequency.exponentialRampToValueAtTime(820, now + 0.45); // 빠르게 상승
+    warpOsc.frequency.exponentialRampToValueAtTime(70, now + 1.0);  // 다시 하강하며 발사 완료 느낌
+
+    var warpGain = ctx.createGain();
+    warpGain.gain.setValueAtTime(0.0001, now);
+    warpGain.gain.exponentialRampToValueAtTime(0.22, now + 0.1);
+    warpGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.0);
+
+    warpOsc.connect(warpGain);
+    warpGain.connect(ctx.destination);
+    warpOsc.start(now);
+    warpOsc.stop(now + 1.02);
+
+    /* ---------- 3) 발사 신호음 (짧은 삐빅음) ---------- */
+    var beepOsc = ctx.createOscillator();
+    beepOsc.type = 'square';
+    beepOsc.frequency.setValueAtTime(1700, now);
+    beepOsc.frequency.exponentialRampToValueAtTime(2500, now + 0.12);
+
+    var beepGain = ctx.createGain();
+    beepGain.gain.setValueAtTime(0.0001, now);
+    beepGain.gain.exponentialRampToValueAtTime(0.14, now + 0.02);
+    beepGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+
+    beepOsc.connect(beepGain);
+    beepGain.connect(ctx.destination);
+    beepOsc.start(now);
+    beepOsc.stop(now + 0.22);
+  } catch (soundError) {
+    // 오디오 재생 중 오류가 발생해도 추첨 연출 자체는 계속 진행되어야 하므로 무시합니다.
+  }
+}
+
+/**
+ * [STEP 2] 사용자가 버튼을 클릭했을 때 실행되는 준비 단계입니다.
+ * 버튼 글로우 강화, 박스 진동, 네온 강조 효과를 적용하고 우주선 발사 효과음을 재생합니다.
+ */
+function playChargeStep() {
+  drawButton.disabled = true;
+  drawButton.classList.add('charging');
+  hexWrap.classList.add('shaking');
+  hudStatusText.textContent = 'CHARGING ENERGY CORE...';
+  stageCaption.textContent = 'CHARGING // 에너지 코어 충전 중';
+
+  // 버튼을 누른 시점(사용자 제스처) 안에서 바로 소리를 재생합니다.
+  playSpaceshipLaunchSound();
+}
+
+/**
+ * [STEP 3] 추첨 시작 단계입니다.
+ * 박스가 열리는 연출(네온 폭발 + 스캔라인 가속)을 재생합니다.
+ */
+function playOpeningStep() {
+  hexWrap.classList.remove('shaking');
+  hexWrap.classList.add('opening');
+  hudStatusText.textContent = 'DRAWING IN PROGRESS...';
+  stageCaption.textContent = 'OPENING // 보급 상자 개방 중';
+}
+
+/**
+ * [STEP 4] 번호 공개 단계입니다.
+ * 번호 공 6개를 박스 내부에서 순서대로 튀어나오게 만듭니다.
+ * @param {number[]} numbers - 추첨된 번호 배열 (오름차순)
+ * @return {Promise} 모든 공의 등장 애니메이션이 끝나면 resolve 되는 Promise
+ */
+function playRevealStep(numbers) {
+  return new Promise(function (resolve) {
+    ballLaunchArea.innerHTML = ''; // 이전 결과 초기화
+    hudStatusText.textContent = 'NUMBERS DETECTED';
+    stageCaption.textContent = 'REVEAL // 번호가 드롭되는 중';
+
+    var staggerDelay = 180; // 공 사이의 등장 간격(ms)
+
+    numbers.forEach(function (num, index) {
+      var ball = createBallElement(num);
+      ballLaunchArea.appendChild(ball);
+
+      // 약간의 지연 뒤 'show' 클래스를 붙여 순차 등장 애니메이션을 실행합니다.
+      setTimeout(function () {
+        ball.classList.add('show');
+      }, index * staggerDelay);
+    });
+
+    // 마지막 공까지 애니메이션이 끝나는 시점을 계산해 resolve 합니다.
+    var totalTime = numbers.length * staggerDelay + 650;
+    setTimeout(resolve, totalTime);
+  });
+}
+
+/**
+ * 추첨 결과 카드(히스토리 항목) 하나를 만들어 반환하는 함수입니다.
+ * @param {number[]} numbers - 추첨된 번호 배열
+ * @param {number} orderNumber - 이번이 몇 번째 추첨인지 (1, 2, 3)
+ * @return {HTMLElement} 완성된 카드 엘리먼트
+ */
+function createResultEntry(numbers, orderNumber) {
+  var entry = document.createElement('div');
+  entry.className = 'result-entry';
+
+  var header = document.createElement('div');
+  header.className = 'result-entry-header';
+
+  var now = new Date();
+  var timeText = now.getHours() + '시 ' + now.getMinutes() + '분';
+
+  header.innerHTML =
+    '<span class="entry-tag">DRAW #' + orderNumber + '</span><span>' + timeText + '</span>';
+
+  var ballRow = document.createElement('div');
+  ballRow.className = 'result-ball-row';
+  numbers.forEach(function (num) {
+    ballRow.appendChild(createBallElement(num));
+  });
+
+  entry.appendChild(header);
+  entry.appendChild(ballRow);
+  return entry;
+}
+
+/**
+ * [STEP 5] 최종 결과 단계입니다.
+ * 새 결과 카드를 히스토리 맨 위에 추가하고, 최대 3회까지 누적되도록 관리합니다.
+ * 3회에 도달하면 추첨 버튼을 잠그고 리셋 버튼을 노출합니다.
+ * @param {number[]} numbers - 추첨된 번호 배열
+ */
+function playFinalStep(numbers) {
+  drawCount += 1;
+
+  // 이전에 '최신' 카드였던 항목의 강조 표시를 해제합니다.
+  var previousLatest = resultHistory.querySelector('.result-entry.latest');
+  if (previousLatest) previousLatest.classList.remove('latest');
+
+  // 새 카드를 만들어 히스토리 맨 위(가장 최근 위치)에 추가합니다.
+  var entry = createResultEntry(numbers, drawCount);
+  entry.classList.add('latest');
+  resultHistory.insertBefore(entry, resultHistory.firstChild);
+
+  // 등장 트랜지션이 자연스럽게 재생되도록 다음 프레임에 visible 클래스를 붙입니다.
+  requestAnimationFrame(function () {
+    entry.classList.add('visible');
+  });
+
+  // 상단 카운터 태그를 갱신합니다. (예: 2/3)
+  drawCountTag.textContent = drawCount + '/' + MAX_DRAWS;
+
+  // 박스를 다시 대기(HUD standby) 상태로 되돌립니다.
+  hexWrap.classList.remove('opening');
+  ballLaunchArea.innerHTML = '';
+
+  if (drawCount >= MAX_DRAWS) {
+    // 최대 횟수에 도달한 경우 : 버튼을 잠그고 리셋 버튼을 보여줍니다.
+    hudStatusText.textContent = 'MAX DRAW REACHED // RESET REQUIRED';
+    stageCaption.textContent = 'LOCKED // 3회 추첨을 모두 사용했습니다';
+    drawButton.disabled = true;
+    drawButton.classList.remove('charging');
+    drawButtonLabel.textContent = '추첨 완료';
+    historyCompleteNote.style.display = 'block';
+    resetButton.classList.add('show');
+  } else {
+    // 아직 여유가 있는 경우 : 다음 추첨을 바로 진행할 수 있도록 복원합니다.
+    hudStatusText.textContent = 'SYSTEM ONLINE // DRAW MODULE READY';
+    stageCaption.textContent = 'STANDBY // 번호 추첨 버튼을 눌러주세요 (' + drawCount + '/' + MAX_DRAWS + ')';
+    drawButton.disabled = false;
+    drawButton.classList.remove('charging');
+    drawButtonLabel.textContent = '다시 추첨';
+  }
+
+  isDrawing = false;
+}
+
+/**
+ * 누적된 히스토리를 모두 지우고 처음 상태로 되돌리는 함수입니다.
+ * 리셋 버튼을 누르면 실행됩니다.
+ */
+function resetDrawHistory() {
+  drawCount = 0;
+  resultHistory.innerHTML = '';
+  drawCountTag.textContent = '0/' + MAX_DRAWS;
+  historyCompleteNote.style.display = 'none';
+  resetButton.classList.remove('show');
+
+  hudStatusText.textContent = 'SYSTEM ONLINE // DRAW MODULE READY';
+  stageCaption.textContent = 'STANDBY // 번호 추첨 버튼을 눌러주세요';
+
+  drawButton.disabled = false;
+  drawButton.classList.remove('charging');
+  drawButtonLabel.textContent = '번호 추첨';
+}
+
+/**
+ * 전체 추첨 프로세스를 순서대로 실행하는 메인 함수입니다.
+ * STEP2 (충전) -> STEP3 (개방) -> STEP4 (번호 공개) -> STEP5 (결과) 순으로 진행됩니다.
+ * 서버 응답 시간과 상관없이 연출이 부자연스럽지 않도록
+ * 최소 연출 시간(minShowTime)을 함께 보장합니다.
+ */
+function runDrawSequence() {
+  if (isDrawing) return; // 이미 추첨 중이면 무시 (중복 클릭 방지)
+  if (drawCount >= MAX_DRAWS) return; // 최대 누적 횟수(3회)에 도달했으면 무시
+
+  isDrawing = true;
+  playChargeStep();
+
+  // 서버에서 번호를 받아오는 작업과, 최소 연출 시간을 기다리는 작업을 동시에 시작합니다.
+  var numbersPromise = requestNumbersFromServer();
+  var minShowTime = wait(1500); // STEP3 연출이 최소 1.5초 유지되도록 보장
+
+  wait(400) // 충전 연출을 잠깐 보여준 뒤
+    .then(function () {
+      playOpeningStep();
+      return Promise.all([numbersPromise, minShowTime]);
+    })
+    .then(function (results) {
+      var numbers = results[0];
+      return playRevealStep(numbers).then(function () {
+        return numbers;
+      });
+    })
+    .then(function (numbers) {
+      playFinalStep(numbers);
+    })
+    .catch(function (error) {
+      // 오류가 발생해도 사용자가 다시 시도할 수 있도록 상태를 복원합니다.
+      hudStatusText.textContent = 'ERROR // 다시 시도해 주세요';
+      stageCaption.textContent = 'ERROR // ' + (error && error.message ? error.message : '알 수 없는 오류');
+      hexWrap.classList.remove('opening', 'shaking');
+      drawButton.disabled = false;
+      drawButton.classList.remove('charging');
+      isDrawing = false;
+    });
+}
+
+// 추첨 버튼 클릭 이벤트 연결
+drawButton.addEventListener('click', runDrawSequence);
+
+// 리셋 버튼 클릭 이벤트 연결 (3회 누적 후 다시 시작할 때 사용)
+resetButton.addEventListener('click', resetDrawHistory);
+
+/**
+ * 최하단 네온 몬스터 낙서 패턴 배경을 SVG로 생성해서 적용하는 함수입니다.
+ * 외부 이미지/라이브러리 없이 순수 SVG 데이터로만 구성했습니다.
+ */
+function applyMonsterPattern() {
+  var svg =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="210" height="92" viewBox="0 0 210 92">' +
+      '<g fill="none" stroke="%2317f2ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.9">' +
+        '<path d="M20 70 q0 -30 20 -30 q20 0 20 30 l-6 10 h-28 z"/>' +
+        '<circle cx="30" cy="48" r="3" fill="%2317f2ff"/>' +
+        '<circle cx="46" cy="48" r="3" fill="%2317f2ff"/>' +
+        '<path d="M28 60 q6 6 12 0" />' +
+        '<path d="M14 44 l-6 -10 M56 44 l6 -10" />' +
+      '</g>' +
+      '<g fill="none" stroke="%233d6bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.85">' +
+        '<rect x="95" y="42" width="34" height="30" rx="8"/>' +
+        '<circle cx="106" cy="56" r="2.6" fill="%233d6bff"/>' +
+        '<circle cx="120" cy="56" r="2.6" fill="%233d6bff"/>' +
+        '<path d="M100 42 l4 -10 M126 42 l-4 -10" />' +
+        '<path d="M104 66 h18" />' +
+      '</g>' +
+      '<g fill="none" stroke="%237b3bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.85">' +
+        '<path d="M165 72 v-24 q0 -12 12 -12 q12 0 12 12 v24 z"/>' +
+        '<circle cx="173" cy="44" r="2.4" fill="%237b3bff"/>' +
+        '<circle cx="183" cy="44" r="2.4" fill="%237b3bff"/>' +
+        '<path d="M170 54 q6 4 12 0" />' +
+      '</g>' +
+    '</svg>';
+
+  var dataUrl = 'url("data:image/svg+xml,' + svg + '")';
+  document.getElementById('monsterStrip').style.backgroundImage = dataUrl;
+}
+
+// 페이지가 로드되면 몬스터 패턴을 한 번 적용합니다.
+applyMonsterPattern();
+</script>
+</body>
+</html>
